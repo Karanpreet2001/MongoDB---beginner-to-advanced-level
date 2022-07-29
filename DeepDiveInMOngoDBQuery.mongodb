@@ -1,0 +1,65 @@
+use('test');
+
+
+//Part A
+//Start from an empty products collection and populate the collection using the following command. 
+db.products.deleteMany({})
+
+
+db.products.insertMany( [
+  { item: "canvas", qty: 100, size: { h: 28, w: 35.5, uom: "cm" }, status: "A" },
+  { item: "journal", qty: 25, size: { h: 14, w: 21, uom: "cm" }, status: "A" },
+  { item: "mat", qty: 85, size: { h: 27.9, w: 35.5, uom: "cm" }, status: "A" },
+  { item: "mousepad", qty: 25, size: { h: 19, w: 22.85, uom: "cm" }, status: "P" },
+  { item: "notebook", qty: 50, size: { h: 8.5, w: 11, uom: "in" }, status: "P" },
+  { item: "paper", qty: 100, size: { h: 8.5, w: 11, uom: "in" }, status: "D" },
+  { item: "planner", qty: 75, size: { h: 18.85, w: 30, uom: "cm" }, status: "D" },
+  { item: "postcard", qty: 45, size: { h: 10, w: 15.25, uom: "cm" }, status: "A" },
+  { item: "sketchbook", qty: 80, size: { h: 14, w: 21, uom: "cm" }, status: "A" },
+  { item: "sketch pad", qty: 95, size: { h: 22.85, w: 30.5, uom: "cm" }, status: "A" }
+]); 
+
+//Find all the documents with qty greater than or equal to 50 and with status "A" or "P".
+// The result should only display the item and qty fields
+
+db.products.find({ qty:{ $lte:50 } , status: { $in:["A", "P"]}} , {item: 1, qty : 1 , _id: 0} )
+//or
+You may also use $or as follows
+db.products.find( { qty: { $gte: 50 } , $or: [ { status: "A" }, { status: "P" } ] }, { _id: 0, item: 1, qty: 1 } )
+
+
+//Find all the documents with h greater than 15 and less than 20. 
+//The result should only display the item and h fields.
+
+db.products.find({"size.h" : {$gt:15 , $lt:20} }, { _id:0, "size.h": 1, item: 1 })
+
+
+
+//Part B
+
+// Start from an empty products collection and populate the collection using the following command.
+db.products.deleteMany({})
+
+db.products.insertMany( [
+   { item: "journal", instock: [ { warehouse: "A", qty: 5 }, { warehouse: "C", qty: 50 } ] },
+   { item: "notebook", instock: [ { warehouse: "C", qty: 5 } ] },
+   { item: "paper", instock: [ { warehouse: "A", qty: 60 }, { warehouse: "B", qty: 15 } ] },
+   { item: "planner", instock: [ { warehouse: "A", qty: 40 }, { warehouse: "B", qty: 5 } ] },
+   { item: "pen", instock: [ { warehouse: "A", qty: 50 }, { warehouse: "B", qty: 10 },  { warehouse: "C", qty: 20 } ] },
+   { item: "postcard", instock: [ { warehouse: "B", qty: 15 }, { warehouse: "C", qty: 35 } ] },
+   { item: "pencil"}
+] );
+
+db.products.deleteMany({})
+
+
+//Find the documents where the qty at warehouse A is greater than 40.
+// Do not display the _id field in the result and sort the result by the item field in alphabetical order.
+
+db.products.find( {instock : {$elemMatch : {warehouse: "A" , qty:{ $gt:40 }}}}, {_id:0} ).sort({item : 1})
+
+
+//2.	Find the documents where the first element in the instock array has qty greater than 10 and the second 
+//element has qty less than 15. Do not display the _id field in the result.
+
+db.products.find( {"instock.0.qty" : {$gt : 10} , "instock.1.qty": {$lt : 15}}, {_id:0})
