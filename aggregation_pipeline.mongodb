@@ -1,0 +1,60 @@
+
+//Go the test database using the following command
+use('test');
+
+
+db.orders.deleteMany({})
+
+//Use insertMany() to create a collection orders and populate the collection
+db.orders.insertMany( [
+ { cust_id: "A123", amount: 500, status: "A" },
+ { cust_id: "A123", amount: 250, status: "A" },
+ { cust_id: "B212", amount: 200, status: "A" },
+ { cust_id: "A123", amount: 300, status: "D" }
+] );
+
+// -----------$match stage act as a filter or where clause
+db.orders.aggregate(
+    {$match : {status: "A"}}
+);
+
+// using two filter 
+db.orders.aggregate(
+    {$match : {cust_id : "A123", status: "A"}}  
+);
+
+// using or condition inside match
+db.orders.aggregate(
+    {$match : {$or : [ {amount: {$gte: 300}}, { status : "D"} ]}}  
+);
+
+//-------------$group stage - act as a SQL group
+db.orders.aggregate(
+    {$group : {_id : "$cust_id", total: { $sum: "$amount"}}}  
+);
+
+//Aggregation pipline - [] is optional 
+db.orders.aggregate ([ 
+{ $match : { status : "A" } },
+{ $group: { _id: "$cust_id", total: { $sum: "$amount" } } }
+ ]);
+
+// $count function -
+
+db.orders.aggregate([
+    {$match : {status:"A"}},
+    {$group : {_id:null, count : {$sum: 1}}}
+])
+
+//In MongoDB 5.0, we can use $count in $group stage to get the number of documents in a
+//group directly. We can rewrite the above command as follows
+
+
+db.orders.aggregate([
+    {$match : {status:"A"}},
+    {$group : {_id:null, count : {$count: {}}}}
+])
+
+db.orders.aggregate ( [
+ { $group: { _id: "$status", item_count: { $count: { } } } }
+] );
